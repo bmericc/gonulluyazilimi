@@ -93,10 +93,14 @@
                                 <a class="dropdown-item" href="{{ route('email-redirects') }}">
                                     {{trans('panel.email_forwarding')}}
                                 </a>
+                                <a class="dropdown-item" href="{{ route('email-change-requests.create') }}">
+                                    E-posta değişikliği talebi
+                                </a>
                                 <hr style="margin: 5px; color: #999;">
                                 <a class="dropdown-item" href="{{ route('create-seminar-request') }}">
                                     {{ trans("panel.create_seminar_request") }}
                                 </a>
+                                <a class="dropdown-item" href="{{ route('create-seminar-offer') }}">Seminer vermek istiyorum</a>
                                 <hr style="margin: 5px; color: #999;">
                                 <a class="dropdown-item" href="{{ route('create-reference-request') }}">
                                     {{ trans("panel.create_reference_request") }}
@@ -105,6 +109,8 @@
                                 <a class="dropdown-item" href="{{ route('join-lkd-young') }}">
                                     {{ trans("panel.join_lkd_young") }}
                                 </a>
+                                <a class="dropdown-item" href="{{ route('representations.index') }}">Temsilcilikler</a>
+                                <a class="dropdown-item" href="{{ route('representations.candidate') }}">Temsilci adayı ol</a>
 
                             </div>
                         </li>
@@ -139,6 +145,12 @@
                                     <a class="dropdown-item" href="{{ route('admin.seminar-requests') }}">
                                         {{ trans("panel.seminar_requests") }}
                                     </a>
+                                    @if(Auth::user()->role == 1)<a class="dropdown-item" href="{{ route('admin.seminar-offers') }}">Seminer verme başvuruları</a>@endif
+                                    @if(Auth::user()->role == 1)
+                                        <a class="dropdown-item" href="{{ route('admin.email-change-requests') }}">E-posta değişikliği talepleri</a>
+                                        <a class="dropdown-item" href="{{ route('admin.lkd-young') }}">LKD Genç yönetimi</a>
+                                        <a class="dropdown-item" href="{{ route('admin.representations') }}">Temsilcilik yönetimi</a>
+                                    @endif
                                     <hr style="margin: 5px; color: #999;">
                                     <a class="dropdown-item" href="{{ route('reference-requests') }}">
                                         {{ trans("panel.reference_requests") }}
@@ -155,6 +167,7 @@
                                     <a class="dropdown-item" href="{{ route('my-infos') }}">
                                         {{trans('panel.my_infos')}}
                                     </a>
+                                    <a class="dropdown-item" href="{{ route('password.change.edit') }}">Parola değiştir</a>
                                     <hr style="margin: 5px; color: #999;">
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();

@@ -23,6 +23,7 @@ class SeminarRequestTest extends TestCase
         $this->get('/create-seminar-request')
             ->assertOk()
             ->assertSee($subject->subject)
+            ->assertSee('Verilebilecek seminerler')
             ->assertSee('Giriş yaparak talep oluştur');
 
         $this->get('/create-seminar-request/create')
@@ -36,7 +37,20 @@ class SeminarRequestTest extends TestCase
         $this->get('/create-seminar-request?in-iframe=1')
             ->assertOk()
             ->assertDontSee('navbar')
+            ->assertSee('create-seminar-offer?in-iframe=1', false)
             ->assertHeader('Content-Security-Policy', "frame-ancestors 'self' https://lkd.org.tr https://www.lkd.org.tr");
+    }
+
+    public function test_authenticated_user_sees_subjects_only_in_the_selection_field(): void
+    {
+        $user = User::factory()->create();
+        $subject = $this->createSubject();
+
+        $this->actingAs($user)->get('/create-seminar-request')
+            ->assertOk()
+            ->assertDontSee('Verilebilecek seminerler')
+            ->assertSee('name="seminar_subject_id"', false)
+            ->assertSee($subject->subject);
     }
 
     public function test_seminar_date_must_be_at_least_sixty_days_in_the_future(): void
@@ -46,7 +60,7 @@ class SeminarRequestTest extends TestCase
 
         $this->actingAs($user)->from('/create-seminar-request')->post('/create-seminar-request', $this->requestData($subject, now()->addDays(59)->toDateString()))
             ->assertRedirect('/create-seminar-request')
-            ->assertSessionHasErrors('seminar_date');
+            ->assertSessionHasErrors('seminar_start_date');
 
         $this->assertDatabaseCount('seminar_requests', 0);
     }
@@ -66,6 +80,8 @@ class SeminarRequestTest extends TestCase
         $this->assertSame($user->id, $seminarRequest->user_id);
         $this->assertSame($subject->id, $seminarRequest->seminar_subject_id);
         $this->assertSame('Örnek Üniversite', $seminarRequest->organizationRecord->name);
+        $this->assertSame(now()->addDays(60)->toDateString(), $seminarRequest->seminar_start_date->toDateString());
+        $this->assertSame(now()->addDays(60)->toDateString(), $seminarRequest->seminar_end_date->toDateString());
 
         Mail::assertSent(SeminarRequestNotification::class, fn ($mail) => $mail->hasTo('yk@lkd.org.tr'));
         Mail::assertSent(SeminarRequestReceived::class, fn ($mail) => $mail->hasTo($user->email));
@@ -91,6 +107,43 @@ class SeminarRequestTest extends TestCase
         );
     }
 
+    public function test_end_date_cannot_be_before_start_date(): void
+    {
+        $user = User::factory()->create();
+        $subject = $this->createSubject();
+
+        $this->actingAs($user)->post('/create-seminar-request', $this->requestData(
+            $subject,
+            now()->addDays(61)->toDateString(),
+            now()->addDays(60)->toDateString()
+        ))->assertSessionHasErrors('seminar_end_date');
+    }
+
+    public function test_online_seminar_request_does_not_require_an_address(): void
+    {
+        Mail::fake();
+        $user = User::factory()->create();
+        $subject = $this->createSubject();
+
+        $this->actingAs($user)->post('/create-seminar-request', array_merge(
+            $this->requestData($subject, now()->addDays(60)->toDateString()),
+            ['seminar_type' => 'online', 'location' => '']
+        ))->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('seminar_requests', ['seminar_type' => 'online', 'location' => '']);
+    }
+
+    public function test_in_person_seminar_request_requires_an_address(): void
+    {
+        $user = User::factory()->create();
+        $subject = $this->createSubject();
+
+        $this->actingAs($user)->post('/create-seminar-request', array_merge(
+            $this->requestData($subject, now()->addDays(60)->toDateString()),
+            ['seminar_type' => 'in_person', 'location' => '']
+        ))->assertSessionHasErrors('location');
+    }
+
     private function createSubject(): SeminarSubjects
     {
         $subject = new SeminarSubjects();
@@ -103,13 +156,15 @@ class SeminarRequestTest extends TestCase
         return $subject;
     }
 
-    private function requestData(SeminarSubjects $subject, string $date): array
+    private function requestData(SeminarSubjects $subject, string $startDate, ?string $endDate = null): array
     {
         return [
             'seminar_subject_id' => $subject->id,
             'organization' => 'örnek üniversite',
             'location' => 'Kadıköy, İstanbul',
-            'seminar_date' => $date,
+            'seminar_type' => 'in_person',
+            'seminar_start_date' => $startDate,
+            'seminar_end_date' => $endDate ?? $startDate,
         ];
     }
 }

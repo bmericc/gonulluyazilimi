@@ -69,8 +69,10 @@ class SeminarController extends Controller
         $data = $request->validate([
             'seminar_subject_id' => ['required', 'integer', 'exists:seminar_subjects,id'],
             'organization' => ['required', 'string', 'max:255'],
-            'location' => ['required', 'string', 'max:255'],
-            'seminar_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:'.$minimumSeminarDate],
+            'seminar_type' => ['required', 'in:in_person,online'],
+            'location' => ['nullable', 'string', 'max:255', 'required_if:seminar_type,in_person'],
+            'seminar_start_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:'.$minimumSeminarDate],
+            'seminar_end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:seminar_start_date'],
         ]);
 
         $seminarSubject = SeminarSubjects::where('id', $data['seminar_subject_id'])
@@ -88,8 +90,12 @@ class SeminarController extends Controller
         $seminarRequest->seminar_subject_id = $seminarSubject->id;
         $seminarRequest->organization_id = $organization->id;
         $seminarRequest->organization = $organization->name;
-        $seminarRequest->location = $data['location'];
-        $seminarRequest->seminar_date = $data['seminar_date'];
+        $seminarRequest->seminar_type = $data['seminar_type'];
+        $seminarRequest->location = $data['seminar_type'] === 'online' ? '' : $data['location'];
+        // Keep the original column populated for existing reports and integrations.
+        $seminarRequest->seminar_date = $data['seminar_start_date'];
+        $seminarRequest->seminar_start_date = $data['seminar_start_date'];
+        $seminarRequest->seminar_end_date = $data['seminar_end_date'];
         $seminarRequest->status = 'pending';
         $seminarRequest->save();
         $seminarRequest->load(['user', 'seminarSubject', 'organizationRecord']);

@@ -55,6 +55,38 @@
 
                     </ul>
 
+                    <h2>LKD Genç</h2>
+
+                    <p>Üniversite öğrencisiyseniz LKD Genç ağına katılabilir, kampüsünüzdeki özgür yazılım çalışmalarına destek olabilir ve üniversitenizin LKD Genç temsilcisi olmak için aday olabilirsiniz.</p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-success" href="{{ route('join-lkd-young') }}">LKD Genç'e katıl</a>
+                    </div>
+
+                    <p class="mt-3 text-muted">Başvuru için giriş yapmanız gerekir. Temsilcilik adaylığı YK onayıyla değerlendirilir.</p>
+
+                    <h2>LKD Temsilcilikleri</h2>
+
+                    <p>Bulunduğunuz şehirdeki LKD temsilciliğiyle iletişim kurabilir, yerel çalışmalara gönüllü olarak katılabilir veya temsilci adaylığınızı iletebilirsiniz.</p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-primary" href="https://www.lkd.org.tr/hakkimizda/temsilcilikler/" target="_blank" rel="noopener noreferrer">Temsilcilikleri görüntüle</a>
+                        <a class="btn btn-outline-primary" href="{{ route('representations.candidate') }}">Temsilci adayı ol</a>
+                    </div>
+
+                    <p class="mt-3 text-muted">Temsilcilik iletişim paylaşımı ve adaylık işlemleri için giriş yapmanız gerekir.</p>
+
+                    <h2>Seminer Talepleri</h2>
+
+                    <p>Özgür yazılım, Linux ve ilgili konularda kurumunuzda seminer düzenlemek veya bilgi ve deneyiminizi toplulukla paylaşmak için aşağıdaki formlardan yararlanabilirsiniz.</p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-primary" href="{{ route('create-seminar-request') }}">Seminer talebi oluştur</a>
+                        <a class="btn btn-outline-primary" href="{{ route('create-seminar-offer') }}">Seminer vermek istiyorum</a>
+                    </div>
+
+                    <p class="mt-3 mb-0 text-muted">Talep oluşturmak ve seminer verme başvurusu göndermek için üyelik gereklidir.</p>
+
 
 
                 </div>
